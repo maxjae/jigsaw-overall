@@ -7,21 +7,22 @@
 /**
  * @brief Operation code for read requests
  */
-#define OP_READ 1
+#define OP_READ 0
 
 /**
  * @brief Operation code for write requests
  */
-#define OP_WRITE 2
+#define OP_WRITE 1
 
 /**
  * @brief Structure representing the message header
  */
-struct guest_message_header
+struct mmio_message_header
 {
-    uint8_t operation; /**< Operation type */
-    uint64_t address;  /**< Memory address for the operation */
-    uint32_t length;   /**< Length of data to read or write */
+    uint8_t operation; /** Operation type */
+    uint64_t address;  /** Memory address for the operation */
+    uint64_t length;   /** Length of data to read or write */
+    uint64_t value;    /** Value in case of optype write **/
 } __attribute__((packed));
 
 typedef size_t (region_access_cb_t)(void *opaque, char *buf, size_t count, size_t offset, bool is_write);
