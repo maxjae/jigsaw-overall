@@ -73,6 +73,7 @@ static void cond_signal(pthread_cond_t *cond) {
     }
 }
 
+/*
 // Copied from https://stackoverflow.com/a/40949950
 // We don't need a very accurate timer
 static void start_timer(uint64_t ms) {
@@ -83,6 +84,7 @@ static void start_timer(uint64_t ms) {
 	ms_since = clock() * 1000 / CLOCKS_PER_SEC;
     } while (ms_since <= end);
 }
+*/
 
 static bool edu_msi_enabled(EduState *edu)
 {
@@ -174,7 +176,7 @@ static void dma_rw(EduState *edu, bool write, dma_addr_t *val, dma_addr_t *dma,
     }
 
     if (timer) {
-	start_timer(100);
+	//start_timer(100);
 	edu_dma_timer(edu);
     }
 }
