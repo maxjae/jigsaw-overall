@@ -9,7 +9,6 @@
 #include <time.h>
 
 #include "mmio.h"
-#include "sec_disagg.h"
 #include "ethernet.h"
 
 //#define CONFIG_DISAGG_DEBUG_MMIO
@@ -17,7 +16,7 @@
 static ssize_t mmio_recv(void *buf)
 {
     uint8_t *recv_buf;
-    ssize_t ret;
+    ssize_t size; 
 
     recv_buf = eth_recv_first(true);
     if (!recv_buf) {
@@ -35,33 +34,31 @@ static ssize_t mmio_recv(void *buf)
 
     }
 
-    if (recv_buf[0] == OP_MMIO_READ)
-	ret = disagg_mmio_decrypt(recv_buf + 1, buf, sizeof(struct mmio_message) - sizeof(uint64_t));
-    else
-	ret = disagg_mmio_decrypt(recv_buf + 1, buf, sizeof(struct mmio_message));
+    if (recv_buf[0] == OP_MMIO_READ) {
+	size = sizeof(struct mmio_message) - sizeof(uint64_t);
+	memcpy(buf, recv_buf + 1, size);
+    } else {
+	size = sizeof(struct mmio_message);
+	memcpy(buf, recv_buf + 1, size);
+    }
 
     eth_recv_done(recv_buf);
 
-    return ret;
+    return size;
 }
 
 static int mmio_send_read_reply(void *buf)
 {
     uint8_t *send_buf;
-    void *ret_buf;
     int ret;
 
-    send_buf = eth_get_send_buf(1 + sizeof(uint64_t) + disagg_crypto_mmio_global.authsize);
+    send_buf = eth_get_send_buf(1 + sizeof(uint64_t));
     if (!send_buf) {
 	fprintf(stderr, "mmio_send_read_reply: eth_get_send_buf failed\n");
 	return 1;
     }
 
-    ret_buf = disagg_mmio_encrypt(buf, send_buf + 1, sizeof(uint64_t));
-    if (!ret_buf) {
-	fprintf(stderr, "mmio_send_read_reply: disagg_mmio_encrypt failed\n");
-	return 1;
-    }
+    memcpy(send_buf + 1, buf, sizeof(uint64_t));
 
     send_buf[0] = OP_MMIO_READ;
 
@@ -76,10 +73,6 @@ static int mmio_send_read_reply(void *buf)
 
 void *run_mmio_app(disagg_pci_dev_info *pci_info, void *opaque)
 {
-    if (disagg_init_crypto()) {
-	printf("disagg_init_crypto failed\n");
-    }
-
     printf("MMIO communication application started. Waiting for messages...\n");
 
     char data[sizeof(uint64_t)];

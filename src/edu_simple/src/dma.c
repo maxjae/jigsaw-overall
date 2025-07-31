@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "dma.h"
 
 #include "../../include/common.h"
 #include "ethernet.h"
-#include "sec_disagg.h"
 
 static int send_dma_to_device_request(dma_addr_t addr, size_t count)
 {
@@ -73,17 +73,14 @@ void pci_dma_read(dma_addr_t addr, void *buf, size_t len)
     if (!resp)
 	exit(EXIT_FAILURE);
 
-    if (disagg_dma_decrypt(resp, buf, len) != len) {
-	printf("pci_dma_read: disagg_dma_decrypt failed\n");
-	exit(EXIT_FAILURE);
-    }
+    memcpy(buf, resp, len);
 
     eth_recv_done(resp);
 }
 
 static void *prepare_meta(dma_addr_t addr, size_t count)
 {
-    size_t size_to_send = 1 + (sizeof(uint64_t) * 2) + count + disagg_crypto_dma_global.authsize;
+    size_t size_to_send = 1 + (sizeof(uint64_t) * 2) + count;
     uint8_t *send_buf;
 
     send_buf = eth_get_send_buf(size_to_send);
@@ -106,10 +103,7 @@ void pci_dma_write(dma_addr_t addr, void *buf, size_t len)
 
     send_buf = prepare_meta(addr, len);
 
-    if (disagg_dma_encrypt(buf, send_buf + 1 + (sizeof(uint64_t) * 2), len) != 0) {
-	fprintf(stderr, "pci_dma_write: disagg_dma_encrypt failed\n");
-	exit(EXIT_FAILURE);
-    }
+    memcpy(send_buf + 1 + (sizeof(uint64_t) * 2), buf, len);
 
     ret = eth_send_buf(send_buf);
     if (ret != 0) {
