@@ -89,7 +89,7 @@ void *tcp_recv_mmio_request(void)
     }
 
     // recv new data
-    if (recv_data(cfd, regions_tcp->recv_buf, 1 + sizeof(struct mmio_message) + 16, 0) != 0) {
+    if (recv_data(cfd, regions_tcp->recv_buf, 1 + sizeof(struct mmio_message), 0) != 0) {
 	printf("Error receiving data\n");
 	return NULL;
     }
@@ -141,7 +141,7 @@ void tcp_read_dma(uint64_t addr, size_t count)
 
 	    if (recv_data(cfd, 
 			  dst + 1, 
-			  sizeof(struct mmio_message) + 16, 0) != 0) {
+			  sizeof(struct mmio_message), 0) != 0) {
 		printf("recv failed for filling of mmio requests in buffer\n");
 		return;
 	    }

@@ -30,7 +30,7 @@ struct disagg_regions_tcp {
      * First bytes are meta-data for proxy in request case.
      */
     char dma_mem[DMA_SIZE + (sizeof(uint64_t) * 2) + 1];
-    char *dma_buf; // Pointer used by device to access only its relevant data (is dma_mem + 16 + 1)
+    char *dma_buf; // Pointer used by device to access only its relevant data (is dma_mem + 1)
 };
 
 extern struct disagg_regions_tcp *regions_tcp;
