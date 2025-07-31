@@ -9,7 +9,6 @@
 #include <time.h>
 
 #include "connection.h"
-#include "sec_disagg.h"
 
 //#define CONFIG_DISAGG_DEBUG_MMIO
 
@@ -98,33 +97,27 @@ static void wait_for_read_doorbell_clear() {
 }
 
 static int ivshmem_mmio_region_read(void *buf) {
-    size_t msg_size;
+    uint8_t type;
 
     wait_for_write_doorbell_set();
 
-    memcpy(disagg_crypto_mmio_global.buf, shmem + MMIO_REGION_OFFSET, 1 + sizeof(struct mmio_message_header) + disagg_crypto_mmio_global.authsize);
+    memcpy(&type, shmem + MMIO_REGION_OFFSET, 1);
+    memcpy(buf, shmem + MMIO_REGION_OFFSET + 1, sizeof(struct mmio_message_header));
 
     __atomic_store_n(write_doorbell, 0, __ATOMIC_RELEASE);
 
-    if (*((uint8_t *)disagg_crypto_mmio_global.buf) == OP_READ)
-	msg_size = sizeof(struct mmio_message_header) - sizeof(uint64_t);
-    else
-	msg_size = sizeof(struct mmio_message_header);
-
-    return disagg_mmio_decrypt(disagg_crypto_mmio_global.buf + 1, buf, msg_size);
+    return 0;
 }
 
 static int ivshmem_mmio_region_write(void *buf, size_t count) {
 
-    if (disagg_mmio_encrypt(buf, disagg_crypto_mmio_global.buf + 1, count) != 0)
-	return 1;
-
     // Op-type can only be OP_READ
-    *((uint8_t *) disagg_crypto_mmio_global.buf) = OP_READ;
-
+    uint8_t type = OP_READ;
+    
     wait_for_read_doorbell_clear();
 
-    memcpy(shmem + MMIO_REGION_OFFSET, disagg_crypto_mmio_global.buf, 1 + count + disagg_crypto_mmio_global.authsize);
+    memcpy(shmem + MMIO_REGION_OFFSET, &type, 1);
+    memcpy(shmem + MMIO_REGION_OFFSET + 1, buf, count);
 
     __atomic_store_n(read_doorbell, 1, __ATOMIC_RELEASE);
 
@@ -136,10 +129,6 @@ void *run_shmem_app(disagg_pci_dev_info *pci_info, void *opaque) {
         printf("SHMEM: init_shared_memory failed\n");
     }
     
-    if (disagg_init_crypto()) {
-	printf("SHMEM: disagg_init_crypto failed\n");
-    }
-
     printf("connection.c: In shmem app\n");
 
     printf("SHMEM application started. Waiting for messages...\n");

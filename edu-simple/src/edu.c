@@ -31,17 +31,14 @@
 #include <stdbool.h>
 
 #include "edu.h"
-#include "sec_disagg.h"
 
 /* Qemu normally provides those functions */
 void pci_dma_read(dma_addr_t addr, void *buf, size_t len) {
-    if (disagg_dma_decrypt((void *)addr, buf, len) != len)
-	printf("pci_dma_read failed\n");
+    memcpy(buf, (void *)addr, len);
 }
 
 void pci_dma_write(dma_addr_t addr, void *buf, size_t len) {
-    if (disagg_dma_encrypt(buf, (void *)addr, len) != 0)
-	printf("pci_dma_write failed\n");
+    memcpy((void *)addr, buf, len);
 }
 /* End QEMU API */
 
