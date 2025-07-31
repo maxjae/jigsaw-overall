@@ -5,7 +5,6 @@
 
 #include "edu.h"
 #include "mmio.h"
-#include "sec_disagg.h"
 #include "tcp_server.h"
 
 int main(int argc, char **argv) {

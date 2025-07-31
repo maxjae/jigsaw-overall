@@ -33,24 +33,17 @@
 #include <stdbool.h>
 
 #include "edu.h"
-#include "sec_disagg.h"
 #include "tcp_server.h"
 
 /* Qemu API normally provides those functions */
 void pci_dma_read(dma_addr_t addr, void *buf, size_t len) {
     tcp_read_dma(addr, len);
 
-    if (disagg_dma_decrypt(regions_tcp->dma_buf, buf, len) != len) {
-	printf("pci_dma_read failed\n");
-	exit(EXIT_FAILURE);
-    }
+    memcpy(buf, regions_tcp->dma_buf, len);
 }
 
 void pci_dma_write(dma_addr_t addr, void *buf, size_t len) {
-    if (disagg_dma_encrypt(buf, regions_tcp->dma_buf, len) != 0) {
-	printf("pci_dma_write failed\n");
-	exit(EXIT_FAILURE);
-    }
+    memcpy(regions_tcp->dma_buf, buf, len);
 
     tcp_write_dma(addr, len);
 }

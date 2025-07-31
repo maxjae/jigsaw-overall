@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 	    ret = get_write_doorbell();
 	    if (ret == 1) {
 		// Message ready to send
-		ret = tcp_send_buf(shmem + MMIO_REGION_OFFSET, 1 + sizeof(struct mmio_message) + 16);
+		ret = tcp_send_buf(shmem + MMIO_REGION_OFFSET, 1 + sizeof(struct mmio_message));
 
 		if (ret != 0) {
 		    perror("send for mmio failed\n");
@@ -69,14 +69,14 @@ int main(int argc, char **argv)
 		    /*** Client sent reply to MMIO read ***/
 
 		    // Receive rest of message 
-		    ret = tcp_recv_data(recv_buf, sizeof(uint64_t) + 16, 0);
+		    ret = tcp_recv_data(recv_buf, sizeof(uint64_t), 0);
 		    if (ret != 0) {
 			perror("Recv of mmio request reply failed");
 			goto err_unmap;
 		    }
 
 		    // Received message. Write to shmem
-		    ret_size = ivshmem_write(recv_buf, sizeof(uint64_t) + 16, 1);
+		    ret_size = ivshmem_write(recv_buf, sizeof(uint64_t), 1);
 		    if (ret_size == -1) {
 			printf("shmem write of mmio reply failed\n");
 			goto err_unmap;
@@ -96,7 +96,6 @@ int main(int argc, char **argv)
 
 		    dma_addr = *((uint64_t *)recv_buf);
 		    dma_size = *(((uint64_t *)recv_buf) + 1);
-		    dma_size += 16; // For auth. tag
 
 		    // Validate requested region
 		    if ((char *)dma_addr < shmem + DMA_REGION_OFFSET 
@@ -133,7 +132,6 @@ int main(int argc, char **argv)
 
 		    dma_addr = *((uint64_t *)recv_buf);
 		    dma_size = *(((uint64_t *)recv_buf) + 1);
-		    dma_size += 16;
 
 		    // Validate sent region
 		    if ((char *)dma_addr < shmem + DMA_REGION_OFFSET 

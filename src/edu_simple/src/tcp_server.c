@@ -8,8 +8,6 @@
 #include <signal.h>
 #include <arpa/inet.h>
 
-#include "sec_disagg.h"
-
 #include "tcp_server.h"
 
 int lfd = -1; // Listening fd
@@ -131,7 +129,7 @@ void tcp_read_dma(uint64_t addr, size_t count)
 	    // Received response to DMA request
 	    if (recv_data(cfd, 
 			  regions_tcp->dma_buf, 
-			  disagg_crypto_dma_global.authsize + count, 0) != 0) {
+			  count, 0) != 0) {
 		printf("recv failed for dma read response\n");
 		return;
 	    }
@@ -155,7 +153,7 @@ void tcp_read_dma(uint64_t addr, size_t count)
 
 void tcp_write_dma(uint64_t addr, size_t count)
 {
-    size_t size_to_send = 1 + (sizeof(uint64_t) * 2) + count + disagg_crypto_dma_global.authsize;
+    size_t size_to_send = 1 + (sizeof(uint64_t) * 2) + count;
     ssize_t ret;
 
     /*** Send DMA region to proxy ***/

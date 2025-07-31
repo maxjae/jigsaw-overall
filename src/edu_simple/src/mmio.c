@@ -9,7 +9,6 @@
 #include <time.h>
 
 #include "mmio.h"
-#include "sec_disagg.h"
 #include "tcp_server.h"
 
 //#define CONFIG_DISAGG_DEBUG_MMIO
@@ -24,22 +23,22 @@ static ssize_t mmio_recv(void *buf)
 	return -1;
     }
 
-    if (*((uint8_t *)res) == OP_MMIO_READ)
-	return disagg_mmio_decrypt(res + 1, buf, sizeof(struct mmio_message) - sizeof(uint64_t));
-    else
-	return disagg_mmio_decrypt(res + 1, buf, sizeof(struct mmio_message));
+    if (*((uint8_t *)res) == OP_MMIO_READ) {
+	memcpy(buf, res + 1, sizeof(struct mmio_message) - sizeof(uint64_t));
+	return sizeof(struct mmio_message) - sizeof(uint64_t);
+    } else {
+	memcpy(buf, res + 1, sizeof(struct mmio_message));
+	return sizeof(struct mmio_message);
+    }
 }
 
 static int mmio_send_read_reply(void *buf)
 {
-    void *enc_send_buf = disagg_mmio_encrypt(buf, regions_tcp->send_buf + 1, sizeof(uint64_t));
-    if (!enc_send_buf) {
-	return -1;
-    }
+    memcpy(regions_tcp->send_buf + 1, buf, sizeof(uint64_t));
 
     *((uint8_t *)regions_tcp->send_buf) = OP_MMIO_READ;
 
-    int ret = tcp_send(regions_tcp->send_buf, 1 + sizeof(uint64_t) + disagg_crypto_mmio_global.authsize);
+    int ret = tcp_send(regions_tcp->send_buf, 1 + sizeof(uint64_t));
     if (ret != 0)
 	return -1;
 
@@ -48,10 +47,6 @@ static int mmio_send_read_reply(void *buf)
 
 void *run_mmio_app(disagg_pci_dev_info *pci_info, void *opaque)
 {
-    if (disagg_init_crypto()) {
-	printf("disagg_init_crypto failed\n");
-    }
-
     printf("MMIO communication application started. Waiting for messages...\n");
 
     char data[sizeof(uint64_t)];
