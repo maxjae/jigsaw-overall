@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <signal.h>
 #include <arpa/inet.h>
 
@@ -272,6 +273,10 @@ int init_tcp(int argc, char **argv)
 	ret = 1;
 	goto err_acc;
     }
+
+    if (setsockopt(cfd, IPPROTO_TCP, TCP_NODELAY, &(int){1}, sizeof(int)) != 0)
+	printf("TCP_NODELAY could not be set for the socket. May result in worse performance\n");
+
 
     // Print the address information of connected client
     if (NULL == inet_ntop(AF_INET, &csaddr.sin_addr.s_addr, csaddrString, sizeof(csaddrString) - 1)) {

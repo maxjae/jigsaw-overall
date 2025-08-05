@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <unistd.h>
 #include <string.h>
 #include <arpa/inet.h>
@@ -140,6 +141,10 @@ int init_tcp(int argc, char **argv)
 	perror("Creating of local socket failed");
 	goto out;
     }
+
+     if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &(int){1}, sizeof(int)) != 0)
+	printf("TCP_NODELAY could not be set for the socket. May result in worse performance\n");
+
 
     // Convert command line arguments to address info for local address
     lsaddr.sin_family = AF_INET;
