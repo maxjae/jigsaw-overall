@@ -4,9 +4,9 @@
         -object memory-backend-memfd,id=sysmem-file,size=8G \
         -numa node,memdev=sysmem-file \
         -smp 8 \
-        -kernel ./spdm-linux/arch/x86/boot/bzImage \
+        -kernel $1/spdm-linux/arch/x86/boot/bzImage \
         -append "console=ttyS0 root=/dev/sda rw earlyprintk=serial net.ifnames=0 nokaslr" \
-        -drive file=./qemu-image.img,format=raw \
+        -drive file=$2/qemu-image.img,format=raw \
         -object memory-backend-file,size=1M,share=on,mem-path=/dev/shm/ivshmem,id=hostmem \
 	-device ivshmem-plain,memdev=hostmem \
 	-net user,host=10.0.2.10,hostfwd=tcp:127.0.0.1:10021-:22 \
