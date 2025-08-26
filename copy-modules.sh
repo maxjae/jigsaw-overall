@@ -13,6 +13,7 @@ qemu_dir="$linux_dir/qemu_edu"
 nix-shell -p gnumake --run "make -C $qemu_dir"
 mkdir mount-point
 sudo mount -o loop $image mount-point
+sudo mkdir -p mount-point/modules
 sudo cp $qemu_dir/*.ko mount-point/modules/
 sudo umount mount-point
 rm -rdf mount-point
