@@ -39,7 +39,7 @@ SRC_PATH := src
 DBG_PATH := debug
 
 # compile macros
-TARGET_NAME := edu_device
+TARGET_NAME := edu_device_emulation 
 ifeq ($(OS),Windows_NT)
 	TARGET_NAME := $(addsuffix .exe,$(TARGET_NAME))
 endif
