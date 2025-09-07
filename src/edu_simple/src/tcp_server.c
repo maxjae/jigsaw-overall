@@ -195,8 +195,8 @@ int init_tcp(int argc, char **argv)
 
     /*** Read ip address and port for listening socket from command line arguments ***/
     struct option long_opts[] = {
-	{ "localAddr", 1, NULL, 'a' },
-	{ "local", 1, NULL, 'b' },
+	{ "localAddress", 1, NULL, 'a' },
+	{ "localPort", 1, NULL, 'b' },
 	{ NULL, 0, NULL, 0 }
     };
 
@@ -210,7 +210,7 @@ int init_tcp(int argc, char **argv)
 	    break;
 	default:
 	    printf("usage: %s\n", argv[0]);
-	    printf("\t[--localAddr [IP address of local interface]              or -a]\n");
+	    printf("\t[--localAddress [IP address of local interface]              or -a]\n");
 	    printf("\t[--localPort [Port to use]                                or -b]\n");
 	    goto out;
 	}
@@ -219,7 +219,7 @@ int init_tcp(int argc, char **argv)
     if (!localAddrString || !localPortString) {
 	printf("All two arguments have to be specified\n");
 	printf("usage: %s\n", argv[0]);
-	printf("\t[--localAddr [IP address of local interface]              or -a]\n");
+	printf("\t[--localAddress [IP address of local interface]              or -a]\n");
 	printf("\t[--localPort [Port to use]                                or -b]\n");
 	goto out;
     }
@@ -241,7 +241,7 @@ int init_tcp(int argc, char **argv)
     ssaddr.sin_family = AF_INET;
     ssaddr.sin_port = htons(localPort);
     if (0 == inet_aton(localAddrString, &ssaddr.sin_addr)) {
-	printf("Invalid localAddr: %s\n", localAddrString);
+	printf("Invalid localAddress: %s\n", localAddrString);
 	goto err_sock;
     }
 

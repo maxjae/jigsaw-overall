@@ -82,9 +82,9 @@ int init_tcp(int argc, char **argv)
 
     /*** Read command line arguments ***/
     struct option long_opts[] = {
-	{ "remoteAddr", 1, NULL, 'a' },
+	{ "remoteAddress", 1, NULL, 'a' },
 	{ "remotePort", 1, NULL, 'b' },
-	{ "localAddr", 1, NULL, 'c' },
+	{ "localAddress", 1, NULL, 'c' },
 	{ "localPort", 1, NULL, 'd' },
 	{ NULL, 0, NULL, 0 }
     };
@@ -105,9 +105,9 @@ int init_tcp(int argc, char **argv)
 	    break;
 	default:
 	    printf("usage: %s\n", argv[0]);
-	    printf("\t[--remoteAddr [IP address of remote host's interface]      or -a]\n");
+	    printf("\t[--remoteAddress [IP address of remote host's interface]      or -a]\n");
 	    printf("\t[--remotePort [Port of remote host]                        or -b]\n");
-	    printf("\t[--localAddr [IP address of local interface]               or -c]\n");
+	    printf("\t[--localAddress [IP address of local interface]               or -c]\n");
 	    printf("\t[--localPort [Local port to use]                           or -d]\n");
 	    goto out;
 	}
@@ -116,9 +116,9 @@ int init_tcp(int argc, char **argv)
     if (!remoteAddrString || !remotePortString || !localAddrString || !localPortString) {
 	printf("All four arguments have to be specified\n");
 	printf("usage: %s\n", argv[0]);
-	printf("\t[--remoteAddr [IP address of remote host's interface]      or -a]\n");
+	printf("\t[--remoteAddress [IP address of remote host's interface]      or -a]\n");
         printf("\t[--remotePort [Port of remote host]                        or -b]\n");
-        printf("\t[--localAddr [IP address of local interface]               or -c]\n");
+        printf("\t[--localAddress [IP address of local interface]               or -c]\n");
         printf("\t[--localPort [Local port to use]                           or -d]\n");
 	goto out;
     }
@@ -165,7 +165,7 @@ int init_tcp(int argc, char **argv)
     ssaddr.sin_family = AF_INET;
     ssaddr.sin_port = htons(remotePort);
     if (0 == inet_aton(remoteAddrString, &ssaddr.sin_addr)) {
-	printf("Invalid remoteAddr: %s\n", remoteAddrString);
+	printf("Invalid remoteAddress: %s\n", remoteAddrString);
 	goto err_sock;
     }
 
